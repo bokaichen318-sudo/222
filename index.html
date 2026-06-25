@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chief Bet Board</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #f59e0b;
+      --dark: #111827;
+      --soft-blue: #eff6ff;
+      --soft-green: #ecfdf5;
+      --soft-red: #fef2f2;
+      --radius: 18px;
+      --shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "Microsoft JhengHei", sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 280px);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .hero {
+      background: var(--dark);
+      color: white;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 5vw, 44px);
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: #cbd5e1;
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      color: #e5e7eb;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--warning);
+    }
+
+    .dot.ok { background: var(--success); }
+    .dot.bad { background: var(--danger); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 15px;
+    }
+
+    .stat-label {
+      color: #cbd5e1;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      background: rgba(243, 246, 251, 0.92);
+      backdrop-filter: blur(12px);
+      padding: 10px 0;
+      margin-bottom: 10px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .card-title h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    label {
+      font-weight: 800;
+      display: block;
+      margin: 14px 0 7px;
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 13px 12px;
+      font-size: 16px;
+      background: #fff;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 15px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-dark { background: var(--dark); color: white; }
+    .btn-light { background: #f3f4f6; color: var(--text); border: 1px solid var(--line); }
+    .btn-wide { width: 100%; }
+
+    .sync-bar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .sync-text {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .positive { color: var(--success); font-weight: 900; }
+    .negative { color: var(--danger); font-weight: 900; }
+    .neutral { color: var(--text); font-weight: 900; }
+
+    .player-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .player-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .player-name {
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .player-row {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+      margin-top: 8px;
+      font-size: 13px;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .badge-pending { background: var(--soft-blue); color: var(--primary); }
+    .badge-win { background: var(--soft-green); color: var(--success); }
+    .badge-lose { background: var(--soft-red); color: var(--danger); }
+
+    .pending-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 10px;
+      background: white;
+    }
+
+    .pending-card.win { background: var(--soft-green); }
+    .pending-card.lose { background: var(--soft-red); }
+
+    .pending-main {
+      min-width: 0;
+    }
+
+    .pending-title {
+      font-weight: 900;
+      font-size: 16px;
+      margin-bottom: 6px;
+      overflow-wrap: anywhere;
+    }
+
+    .pending-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .pending-actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .history-list {
+      max-height: 430px;
+      overflow-y: auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .empty {
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+      background: #f8fafc;
+    }
+
+    .mobile-only {
+      display: none;
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        padding: 12px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .player-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sync-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .pending-card {
+        grid-template-columns: 1fr;
+      }
+
+      .pending-actions {
+        justify-content: stretch;
+      }
+
+      .pending-actions button {
+        flex: 1;
+      }
+
+      .desktop-only {
+        display: none;
+      }
+
+      .mobile-only {
+        display: block;
+      }
+
+      button {
+        padding: 13px 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="hero">
+      <div class="hero-top">
+        <div>
+          <h1>Chief Bet Board</h1>
+          <p>Chief、Brian、Kevin 專用。批次新增多場下注，選擇對／錯後一次結算，並同步到 Google 試算表。</p>
+        </div>
+        <div class="status-pill">
+          <span id="statusDot" class="dot"></span>
+          <span id="syncStatus">準備同步</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">待結算</div>
+          <div id="statPending" class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">總投注</div>
+          <div id="statTotalBet" class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">總淨利</div>
+          <div id="statProfit" class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">總 ROI</div>
+          <div id="statROI" class="stat-value">0%</div>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" onclick="scrollToSection('add')">新增下注</button>
+      <button class="tab-btn" onclick="scrollToSection('pending')">待結算</button>
+      <button class="tab-btn" onclick="scrollToSection('scoreboard')">記分板</button>
+      <button class="tab-btn" onclick="scrollToSection('history')">紀錄</button>
+    </nav>
+
+    <section class="card" id="sync">
+      <div class="sync-bar">
+        <div>
+          <strong>Google 試算表同步</strong>
+          <div id="saveStatus" class="sync-text">會自動儲存在本機，也會同步到雲端。</div>
+        </div>
+        <button class="btn-light" onclick="loadFromCloud()">從雲端讀取</button>
+        <button class="btn-dark" onclick="saveToCloud()">手動上傳</button>
+      </div>
+    </section>
+
+    <main class="layout">
+      <aside>
+        <section class="card" id="add">
+          <div class="card-title">
+            <h2>新增下注</h2>
+          </div>
+          <div class="hint">倍率輸入 65 代表實際賠率 = 1 ÷ 0.65。</div>
+
+          <label for="player">人員</label>
+          <select id="player">
+            <option value="Chief">Chief</option>
+            <option value="Brian">Brian</option>
+            <option value="Kevin">Kevin</option>
+          </select>
+
+          <label for="gameName">場次名稱</label>
+          <input id="gameName" type="text" placeholder="例如：日本 vs 韓國">
+
+          <label for="betAmount">下注金額</label>
+          <input id="betAmount" type="number" placeholder="例如：100" min="0" step="1">
+
+          <label for="odds">倍率數值</label>
+          <input id="odds" type="number" placeholder="例如：65" min="0" step="0.01">
+
+          <div class="btn-row">
+            <button class="btn-primary btn-wide" onclick="addPendingBet()">新增到待結算清單</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-title">
+            <h2>快速操作</h2>
+          </div>
+          <div class="btn-row">
+            <button class="btn-success btn-wide" onclick="settleAll()">結算全部</button>
+            <button class="btn-danger btn-wide" onclick="resetAll()">清空全部資料</button>
+          </div>
+          <p class="hint">清空會同步清空 Google 試算表資料，請小心使用。</p>
+        </section>
+      </aside>
+
+      <div>
+        <section class="card" id="pending">
+          <div class="card-title">
+            <h2>待結算清單</h2>
+            <span id="pendingCountBadge" class="badge badge-pending">0 場</span>
+          </div>
+          <div id="pendingList"></div>
+        </section>
+
+        <section class="card" id="scoreboard">
+          <div class="card-title">
+            <h2>三人記分板</h2>
+          </div>
+
+          <div id="playerCards" class="player-grid mobile-only"></div>
+
+          <div class="table-wrap desktop-only">
+            <table>
+              <thead>
+                <tr>
+                  <th>名字</th>
+                  <th>勝場</th>
+                  <th>敗場</th>
+                  <th>勝率</th>
+                  <th>總投注</th>
+                  <th>淨輸贏</th>
+                  <th>ROI</th>
+                </tr>
+              </thead>
+              <tbody id="scoreboardTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card" id="history">
+          <div class="card-title">
+            <h2>已結算紀錄</h2>
+            <button class="btn-light" onclick="copySummary()">複製總結</button>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbyF66eVSINJq8dRXsokoYsDYhtYWfvMk-IC-EKgMMfOyLjKGOrcMQcxtB5NaW_CROrC/exec";
+const STORAGE_KEY = "bettingScoreboard_reorganized_v1";
+
+let players = {
+  Chief: { wins: 0, losses: 0, totalBet: 0, profit: 0 },
+  Brian: { wins: 0, losses: 0, totalBet: 0, profit: 0 },
+  Kevin: { wins: 0, losses: 0, totalBet: 0, profit: 0 }
+};
+
+let pendingBets = [];
+let history = [];
+let isSavingCloud = false;
+
+function currentData() {
+  return {
+    players,
+    pendingBets,
+    history,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function setSyncStatus(text, type = "wait") {
+  document.getElementById("syncStatus").textContent = text;
+  const dot = document.getElementById("statusDot");
+  dot.className = "dot";
+  if (type === "ok") dot.classList.add("ok");
+  if (type === "bad") dot.classList.add("bad");
+}
+
+function saveLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(currentData()));
+  document.getElementById("saveStatus").textContent = "本機已儲存：" + new Date().toLocaleString("zh-TW");
+}
+
+async function saveToCloud() {
+  if (isSavingCloud) return;
+  isSavingCloud = true;
+
+  try {
+    setSyncStatus("上傳中...", "wait");
+    await fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(currentData())
+    });
+
+    setSyncStatus("雲端已同步", "ok");
+    document.getElementById("saveStatus").textContent = "雲端已上傳：" + new Date().toLocaleString("zh-TW");
+  } catch (error) {
+    setSyncStatus("雲端上傳失敗", "bad");
+    document.getElementById("saveStatus").textContent = "雲端上傳失敗：" + error.message;
+  } finally {
+    isSavingCloud = false;
+  }
+}
+
+async function loadFromCloud() {
+  try {
+    setSyncStatus("讀取中...", "wait");
+    const response = await fetch(API_URL + "?t=" + Date.now());
+    const data = await response.json();
+
+    if (data && data.players) players = mergePlayers(data.players);
+    if (data && Array.isArray(data.pendingBets)) pendingBets = data.pendingBets;
+    if (data && Array.isArray(data.history)) history = data.history;
+
+    saveLocal();
+    updateAll();
+    setSyncStatus("已從雲端讀取", "ok");
+    document.getElementById("saveStatus").textContent = "雲端已讀取：" + new Date().toLocaleString("zh-TW");
+  } catch (error) {
+    setSyncStatus("讀取失敗", "bad");
+    document.getElementById("saveStatus").textContent = "雲端讀取失敗：" + error.message;
+  }
+}
+
+function mergePlayers(dataPlayers) {
+  const base = {
+    Chief: { wins: 0, losses: 0, totalBet: 0, profit: 0 },
+    Brian: { wins: 0, losses: 0, totalBet: 0, profit: 0 },
+    Kevin: { wins: 0, losses: 0, totalBet: 0, profit: 0 }
+  };
+
+  Object.keys(base).forEach(name => {
+    if (dataPlayers[name]) {
+      base[name] = {
+        wins: Number(dataPlayers[name].wins || 0),
+        losses: Number(dataPlayers[name].losses || 0),
+        totalBet: Number(dataPlayers[name].totalBet || 0),
+        profit: Number(dataPlayers[name].profit || 0)
+      };
+    }
+  });
+
+  return base;
+}
+
+function saveData() {
+  saveLocal();
+  saveToCloud();
+}
+
+function loadLocal() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return;
+
+  try {
+    const data = JSON.parse(saved);
+    if (data.players) players = mergePlayers(data.players);
+    if (Array.isArray(data.pendingBets)) pendingBets = data.pendingBets;
+    if (Array.isArray(data.history)) history = data.history;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function formatMoney(value) {
+  return Number(value || 0).toFixed(2);
+}
+
+function formatPercent(value) {
+  return Number(value || 0).toFixed(2) + "%";
+}
+
+function getClass(value) {
+  if (value > 0) return "positive";
+  if (value < 0) return "negative";
+  return "neutral";
+}
+
+function realOdds(oddsInput) {
+  return 1 / (Number(oddsInput) / 100);
+}
+
+function addPendingBet() {
+  const player = document.getElementById("player").value;
+  const gameName = document.getElementById("gameName").value.trim() || "未命名場次";
+  const betAmount = parseFloat(document.getElementById("betAmount").value);
+  const oddsInput = parseFloat(document.getElementById("odds").value);
+
+  if (!betAmount || betAmount <= 0) {
+    alert("請輸入正確的下注金額");
+    return;
+  }
+
+  if (!oddsInput || oddsInput <= 0) {
+    alert("請輸入正確的倍率數值");
+    return;
+  }
+
+  pendingBets.push({
+    id: Date.now() + Math.random(),
+    player,
+    gameName,
+    betAmount,
+    oddsInput,
+    result: "",
+    createdAt: new Date().toISOString()
+  });
+
+  document.getElementById("gameName").value = "";
+  document.getElementById("betAmount").value = "";
+  document.getElementById("odds").value = "";
+
+  saveData();
+  updateAll();
+  scrollToSection("pending");
+}
+
+function setResult(id, result) {
+  pendingBets = pendingBets.map(bet => {
+    if (Number(bet.id) === Number(id)) bet.result = result;
+    return bet;
+  });
+
+  saveData();
+  updateAll();
+}
+
+function deletePending(id) {
+  pendingBets = pendingBets.filter(bet => Number(bet.id) !== Number(id));
+  saveData();
+  updateAll();
+}
+
+function settleAll() {
+  if (pendingBets.length === 0) {
+    alert("目前沒有待結算的下注");
+    return;
+  }
+
+  if (pendingBets.some(bet => bet.result !== "win" && bet.result !== "lose")) {
+    alert("還有場次沒有選擇對或錯");
+    return;
+  }
+
+  pendingBets.forEach(bet => {
+    const p = players[bet.player];
+    const odds = realOdds(bet.oddsInput);
+    let profit = 0;
+
+    p.totalBet += Number(bet.betAmount);
+
+    if (bet.result === "win") {
+      profit = Number(bet.betAmount) * odds - Number(bet.betAmount);
+      p.wins += 1;
+    } else {
+      profit = -Number(bet.betAmount);
+      p.losses += 1;
+    }
+
+    p.profit += profit;
+
+    history.push({
+      time: new Date().toLocaleString("zh-TW"),
+      player: bet.player,
+      gameName: bet.gameName,
+      betAmount: Number(bet.betAmount),
+      oddsInput: Number(bet.oddsInput),
+      odds,
+      isWin: bet.result === "win",
+      profit
+    });
+  });
+
+  pendingBets = [];
+  saveData();
+  updateAll();
+  scrollToSection("scoreboard");
+}
+
+function resetAll() {
+  if (!confirm("確定要清空所有資料嗎？也會同步清空 Google 試算表資料。")) return;
+
+  players = {
+    Chief: { wins: 0, losses: 0, totalBet: 0, profit: 0 },
+    Brian: { wins: 0, losses: 0, totalBet: 0, profit: 0 },
+    Kevin: { wins: 0, losses: 0, totalBet: 0, profit: 0 }
+  };
+
+  pendingBets = [];
+  history = [];
+  localStorage.removeItem(STORAGE_KEY);
+  saveData();
+  updateAll();
+}
+
+function playerStats(name) {
+  const p = players[name];
+  const games = p.wins + p.losses;
+  const winRate = games > 0 ? (p.wins / games * 100) : 0;
+  const roi = p.totalBet > 0 ? (p.profit / p.totalBet * 100) : 0;
+  return { ...p, games, winRate, roi };
+}
+
+function updateHeroStats() {
+  let totalBet = 0;
+  let profit = 0;
+
+  Object.values(players).forEach(p => {
+    totalBet += Number(p.totalBet || 0);
+    profit += Number(p.profit || 0);
+  });
+
+  const totalROI = totalBet > 0 ? profit / totalBet * 100 : 0;
+
+  document.getElementById("statPending").textContent = pendingBets.length;
+  document.getElementById("statTotalBet").textContent = formatMoney(totalBet);
+  document.getElementById("statProfit").textContent = formatMoney(profit);
+  document.getElementById("statProfit").className = "stat-value " + getClass(profit);
+  document.getElementById("statROI").textContent = formatPercent(totalROI);
+  document.getElementById("statROI").className = "stat-value " + getClass(profit);
+}
+
+function updatePending() {
+  const box = document.getElementById("pendingList");
+  document.getElementById("pendingCountBadge").textContent = pendingBets.length + " 場";
+
+  if (pendingBets.length === 0) {
+    box.innerHTML = '<div class="empty">目前沒有待結算場次</div>';
+    return;
+  }
+
+  box.innerHTML = pendingBets.map(bet => {
+    const odds = realOdds(bet.oddsInput);
+    const rowClass = bet.result === "win" ? "win" : bet.result === "lose" ? "lose" : "";
+    const badge = bet.result === "win"
+      ? '<span class="badge badge-win">已選：對</span>'
+      : bet.result === "lose"
+      ? '<span class="badge badge-lose">已選：錯</span>'
+      : '<span class="badge badge-pending">未選</span>';
+
+    return `
+      <div class="pending-card ${rowClass}">
+        <div class="pending-main">
+          <div class="pending-title">${bet.gameName}</div>
+          <div class="pending-meta">
+            ${badge}　${bet.player}｜下注 ${formatMoney(bet.betAmount)}｜輸入倍率 ${bet.oddsInput}｜實際賠率 ${odds.toFixed(4)}
+          </div>
+        </div>
+        <div class="pending-actions">
+          <button class="btn-success" onclick="setResult(${bet.id}, 'win')">對</button>
+          <button class="btn-danger" onclick="setResult(${bet.id}, 'lose')">錯</button>
+          <button class="btn-light" onclick="deletePending(${bet.id})">刪除</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function updateScoreboard() {
+  const table = document.getElementById("scoreboardTable");
+  const cards = document.getElementById("playerCards");
+
+  table.innerHTML = "";
+  cards.innerHTML = "";
+
+  Object.keys(players).forEach(name => {
+    const s = playerStats(name);
+
+    table.innerHTML += `
+      <tr>
+        <td><strong>${name}</strong></td>
+        <td>${s.wins}</td>
+        <td>${s.losses}</td>
+        <td>${formatPercent(s.winRate)}</td>
+        <td>${formatMoney(s.totalBet)}</td>
+        <td class="${getClass(s.profit)}">${formatMoney(s.profit)}</td>
+        <td class="${getClass(s.profit)}">${formatPercent(s.roi)}</td>
+      </tr>
+    `;
+
+    cards.innerHTML += `
+      <div class="player-card">
+        <div class="player-name">${name}</div>
+        <div class="player-row"><span>勝 / 敗</span><strong>${s.wins} / ${s.losses}</strong></div>
+        <div class="player-row"><span>勝率</span><strong>${formatPercent(s.winRate)}</strong></div>
+        <div class="player-row"><span>總投注</span><strong>${formatMoney(s.totalBet)}</strong></div>
+        <div class="player-row"><span>淨輸贏</span><strong class="${getClass(s.profit)}">${formatMoney(s.profit)}</strong></div>
+        <div class="player-row"><span>ROI</span><strong class="${getClass(s.profit)}">${formatPercent(s.roi)}</strong></div>
+      </div>
+    `;
+  });
+}
+
+function updateHistory() {
+  const box = document.getElementById("historyList");
+
+  if (history.length === 0) {
+    box.innerHTML = '<div class="empty">目前沒有已結算紀錄</div>';
+    return;
+  }
+
+  box.innerHTML = history.slice().reverse().map(item => {
+    const cls = getClass(item.profit);
+    return `
+      <div class="history-item">
+        <strong>${item.player}</strong>｜${item.gameName}<br>
+        ${item.time}｜下注 ${formatMoney(item.betAmount)}｜輸入倍率 ${item.oddsInput}｜實際賠率 ${Number(item.odds).toFixed(4)}<br>
+        結果：${item.isWin ? "對" : "錯"}｜淨輸贏：
+        <span class="${cls}">${formatMoney(item.profit)}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function updateAll() {
+  updateHeroStats();
+  updatePending();
+  updateScoreboard();
+  updateHistory();
+}
+
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: "smooth", block: "start" });
+
+  document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+  const map = { add: 0, pending: 1, scoreboard: 2, history: 3 };
+  const btn = document.querySelectorAll(".tab-btn")[map[id]];
+  if (btn) btn.classList.add("active");
+}
+
+function copySummary() {
+  const lines = Object.keys(players).map(name => {
+    const s = playerStats(name);
+    return `${name}：勝 ${s.wins}、敗 ${s.losses}、勝率 ${formatPercent(s.winRate)}、總投注 ${formatMoney(s.totalBet)}、淨輸贏 ${formatMoney(s.profit)}、ROI ${formatPercent(s.roi)}`;
+  });
+
+  navigator.clipboard.writeText(lines.join("\n")).then(() => {
+    alert("已複製總結");
+  }).catch(() => {
+    alert(lines.join("\n"));
+  });
+}
+
+loadLocal();
+updateAll();
+loadFromCloud();
+</script>
+</body>
+</html>
